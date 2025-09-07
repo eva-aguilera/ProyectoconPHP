@@ -1,0 +1,868 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API de Tejelanas Vivi",
+    "version": "1.0.0",
+    "description": "API REST para la gestión de productos y talleres del emprendimiento Tejelanas Vivi."
+  },
+  "servers": [
+    {
+      "url": "http://localhost/restapi",
+      "description": "Servidor de desarrollo"
+    }
+  ],
+  "paths": {
+    "/productos": {
+      "get": {
+        "summary": "Obtener todos los productos",
+        "description": "Retorna una lista de todos los productos disponibles en la tienda.",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa.",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "description": "El límite de peticiones por hora."
+                },
+                "example": 100
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "description": "El número de peticiones restantes en la hora actual."
+                },
+                "example": 95
+              },
+              "X-RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "description": "El timestamp Unix en el que el límite de peticiones se reiniciará."
+                },
+                "example": 1653571200
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "description": "Directivas de control de caché."
+                },
+                "example": "public, max-age=3600"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "description": "Etiqueta de entidad para la validación de caché."
+                },
+                "example": "W/\"abcdef12345\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Producto"
+                  }
+                },
+                "examples": {
+                  "list_of_products": {
+                    "value": [
+                      {
+                        "id": 6,
+                        "nombre": "Ovillo de Lana de Alpaca",
+                        "descripcion": "Lana suave y natural de alta calidad, ideal para prendas de invierno.",
+                        "precio": 5500,
+                        "stock": 25,
+                        "categoria": "Lanas Natural"
+                      },
+                      {
+                        "id": 1,
+                        "nombre": "Lana de bebe",
+                        "descripcion": "Lana 100% merino, súper suave y perfecta para prendas de bebé.",
+                        "precio": 5000,
+                        "categoria": "lanas suaves",
+                        "stock": 45
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "mensaje": "No se pudo conectar a la base de datos."
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear un nuevo producto",
+        "description": "Agrega un nuevo producto a la tienda.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Producto"
+              },
+              "example": {
+                "nombre": "Kit de Tejedora Principiante",
+                "descripcion": "Kit completo con agujas, lanas y patrones para empezar a tejer.",
+                "precio": 25000,
+                "categoria": "Kits",
+                "stock": 10
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Producto creado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Producto"
+                },
+                "example": {
+                  "id": 7,
+                  "nombre": "Kit de Tejedora Principiante",
+                  "descripcion": "Kit completo con agujas, lanas y patrones para empezar a tejer.",
+                  "precio": 25000,
+                  "categoria": "Kits",
+                  "stock": 10
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud inválida, faltan campos requeridos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "mensaje": "Faltan campos requeridos para ingresar un nuevo producto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "mensaje": "Error al ingresar el producto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/productos/{id}": {
+      "get": {
+        "summary": "Obtiene un Producto por su ID.",
+        "description": "Retorna los detalles de un producto específico.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID del Producto a obtener.",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 6
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Producto encontrado.",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "description": "El límite de peticiones por hora."
+                },
+                "example": 100
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "description": "El número de peticiones restantes en la hora actual."
+                },
+                "example": 95
+              },
+              "X-RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "description": "El timestamp Unix en el que el límite de peticiones se reiniciará."
+                },
+                "example": 1653571200
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "description": "Directivas de control de caché."
+                },
+                "example": "public, max-age=3600"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "description": "Etiqueta de entidad para la validación de caché."
+                },
+                "example": "W/\"abcdef12345\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Producto"
+                },
+                "example": {
+                  "id": 6,
+                  "nombre": "Ovillo de Lana de Alpaca",
+                  "descripcion": "Lana suave y natural de alta calidad, ideal para prendas de invierno.",
+                  "precio": 5500,
+                  "stock": 25,
+                  "categoria": "Lanas Natural"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Producto no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "mensaje": "Producto no encontrado."
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualiza un producto por su ID.",
+        "description": "Actualiza la información completa de un producto existente.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID del Producto a actualizar.",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 6
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Producto"
+              },
+              "example": {
+                "nombre": "Ovillo de Lana de Alpaca XL",
+                "descripcion": "Lana suave y natural de alta calidad, ovillo de 100gr ideal para prendas de invierno.",
+                "precio": 6000,
+                "categoria": "Lanas Natural",
+                "stock": 20
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Producto actualizado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Producto"
+                },
+                "example": {
+                  "id": 6,
+                  "nombre": "Ovillo de Lana de Alpaca XL",
+                  "descripcion": "Lana suave y natural de alta calidad, ovillo de 100gr ideal para prendas de invierno.",
+                  "precio": 6000,
+                  "categoria": "Lanas Natural",
+                  "stock": 20
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Producto no encontrado o sin cambios.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "mensaje": "Producto no encontrado."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud inválida (ej. datos incorrectos).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "mensaje": "Faltan campos requeridos para actualizar el producto."
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Elimina un producto por su ID.",
+        "description": "Elimina un producto de la base de datos de forma permanente.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID del Producto a eliminar.",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 6
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Producto eliminado exitosamente. (Sin contenido)."
+          },
+          "404": {
+            "description": "Producto no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "mensaje": "Producto con ID 99 no encontrado."
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/talleres": {
+      "get": {
+        "summary": "Obtener todos los talleres",
+        "description": "Retorna una lista de todos los talleres disponibles.",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa.",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "description": "El límite de peticiones por hora."
+                },
+                "example": 100
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "description": "El número de peticiones restantes en la hora actual."
+                },
+                "example": 95
+              },
+              "X-RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "description": "El timestamp Unix en el que el límite de peticiones se reiniciará."
+                },
+                "example": 1653571200
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "description": "Directivas de control de caché."
+                },
+                "example": "public, max-age=3600"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "description": "Etiqueta de entidad para la validación de caché."
+                },
+                "example": "W/\"abcdef12345\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Taller"
+                  }
+                },
+                "examples": {
+                  "list_of_workshops": {
+                    "value": [
+                      {
+                        "id": 1,
+                        "nombre": "Taller de Amigurumis Nivel Básico",
+                        "descripcion": "Aprende a tejer lindos muñecos de lana. Incluye materiales.",
+                        "precio": 30000,
+                        "cupos_disponibles": 5,
+                        "fecha": "2025-10-25",
+                        "duracion": 3
+                      },
+                      {
+                        "id": 2,
+                        "nombre": "Tejido con Telar Decorativo",
+                        "descripcion": "Taller para crear tapices decorativos con telar. No requiere experiencia previa.",
+                        "precio": 35000,
+                        "cupos_disponibles": 8,
+                        "fecha": "2025-11-10",
+                        "duracion": 4
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crea un nuevo taller",
+        "description": "Registra un nuevo taller en la base de datos.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Taller"
+              },
+              "example": {
+                "nombre": "Taller de Telar Decorativo",
+                "descripcion": "Aprende la técnica de telar para crear piezas de decoración de pared.",
+                "precio": 35000,
+                "cupos_disponibles": 10,
+                "fecha": "2025-12-05",
+                "duracion": 4
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Taller creado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Taller"
+                },
+                "example": {
+                  "id": 3,
+                  "nombre": "Taller de Telar Decorativo",
+                  "descripcion": "Aprende la técnica de telar para crear piezas de decoración de pared.",
+                  "precio": 35000,
+                  "cupos_disponibles": 10,
+                  "fecha": "2025-12-05",
+                  "duracion": 4
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Solicitud inválida, faltan campos requeridos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "mensaje": "Faltan campos requeridos para crear un nuevo taller."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "mensaje": "Error al crear el taller"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/talleres/{id}": {
+      "get": {
+        "summary": "Obtiene un Taller por su ID.",
+        "description": "Retorna los detalles de un taller específico.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID del Taller a obtener.",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Taller encontrado.",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "description": "El límite de peticiones por hora."
+                },
+                "example": 100
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "description": "El número de peticiones restantes en la hora actual."
+                },
+                "example": 95
+              },
+              "X-RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "description": "El timestamp Unix en el que el límite de peticiones se reiniciará."
+                },
+                "example": 1653571200
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "description": "Directivas de control de caché."
+                },
+                "example": "public, max-age=3600"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "description": "Etiqueta de entidad para la validación de caché."
+                },
+                "example": "W/\"abcdef12345\""
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Taller"
+                },
+                "example": {
+                  "id": 1,
+                  "nombre": "Taller de Amigurumis Nivel Básico",
+                  "descripcion": "Aprende a tejer lindos muñecos de lana. Incluye materiales.",
+                  "precio": 30000,
+                  "cupos_disponibles": 5,
+                  "fecha": "2025-10-25",
+                  "duracion": 3
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Taller no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "mensaje": "Taller no encontrado."
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualiza un taller por su ID",
+        "description": "Actualiza la información de un taller existente.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "El ID único del taller a actualizar.",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Taller"
+              },
+              "example": {
+                "nombre": "Taller de Amigurumis Nivel Intermedio",
+                "descripcion": "Perfecciona tus técnicas de amigurumi, creando figuras más complejas.",
+                "precio": 32000,
+                "cupos_disponibles": 4,
+                "fecha": "2025-10-25",
+                "duracion": 4
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Taller actualizado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Taller"
+                },
+                "example": {
+                  "id": 1,
+                  "nombre": "Taller de Amigurumis Nivel Intermedio",
+                  "descripcion": "Perfecciona tus técnicas de amigurumi, creando figuras más complejas.",
+                  "precio": 32000,
+                  "cupos_disponibles": 4,
+                  "fecha": "2025-10-25",
+                  "duracion": 4
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Faltan campos requeridos en la solicitud o los datos son inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Faltan campos requeridos para actualizar el taller."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Taller no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "mensaje": "Taller no encontrado o sin cambios"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Elimina un taller por su ID",
+        "description": "Elimina un taller de la base de datos.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "El ID único del taller a eliminar.",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Taller eliminado"
+          },
+          "404": {
+            "description": "Taller no encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "mensaje": "Taller no encontrado."
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    },
+    "schemas": {
+      "Producto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "ID único del Producto.",
+            "readOnly": true
+          },
+          "nombre": {
+            "type": "string",
+            "description": "Nombre del Producto."
+          },
+          "descripcion": {
+            "type": "string",
+            "description": "Descripción del Producto."
+          },
+          "precio": {
+            "type": "number",
+            "format": "float",
+            "description": "Precio del producto en CLP"
+          },
+          "categoria": {
+            "type": "string",
+            "description": "Categoría del producto (ej: Lanas, Vellón)"
+          },
+          "stock": {
+            "type": "integer",
+            "description": "Cantidad de unidades en stock"
+          }
+        },
+        "required": [
+          "nombre",
+          "descripcion",
+          "precio",
+          "stock",
+          "categoria"
+         ]
+      },
+      "Taller": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "ID único del Taller.",
+            "readOnly": true
+          },
+          "nombre": {
+            "type": "string",
+            "description": "Nombre del Taller."
+          },
+          "descripcion": {
+            "type": "string",
+            "description": "Descripción detallada del Taller."
+          },
+          "precio": {
+            "type": "number",
+            "format": "float",
+            "description": "Precio del Taller en CLP."
+          },
+          "cupos_disponibles": {
+            "type": "integer",
+            "description": "Número de cupos disponibles."
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date",
+            "description": "Fecha de realización del Taller."
+          },
+          "duracion": {
+            "type": "integer",
+            "description": "Duración del Taller en horas."
+          }
+        },
+        "required": [
+          "nombre",
+          "descripcion",
+          "fecha",
+          "ubicacion",
+          "precio",
+          "cupo_maximo",
+          "imgen_url"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "mensaje": {
+            "type": "string",
+            "description": "Mensaje de error."
+          }
+        },
+        "required": [
+          "mensaje"
+        ]
+      }
+    }
+  }
+}

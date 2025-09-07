@@ -1,64 +1,95 @@
 <?php
 header("Content-Type: application/json");
-// Incluye el archivo que contiene la clase Database
+// Incluye las clases
 include 'config/Database.php';
-// Incluye tu modelo de oferta 
-include 'models/OfertaModel.php';
-// Incluye el controlador
-include 'controllers/OfertaController.php';
+include 'models/ProductoModel.php';
+include 'models/TalleresModel.php';
+include 'controllers/ProductoController.php';
+include 'controllers/TalleresController.php'; // Asegúrate de que no haya errores de tipeo en el nombre del archivo
 
-// Obtener método y URI
+// Lee el URI y el método HTTP
 $method = $_SERVER['REQUEST_METHOD'];
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$uri = explode('/', trim($uri, '/'));
+$request_uri = $_SERVER['REQUEST_URI'];
 
+// Elimina el prefijo 'restapi/' del URI si existe
+$uri = str_replace('/restapi', '', parse_url($request_uri, PHP_URL_PATH));
+$uri_segments = explode('/', trim($uri, '/'));
 
-// 4. AHORA, instancia el controlador y PÁSALE el objeto de conexión
-$ofertaController = new OfertaController();
+$resource = isset($uri_segments[0]) ? strtolower($uri_segments[0]) : '';
+$id = isset($uri_segments[1]) ? (int)$uri_segments[1] : null;
 
-if (count($uri) === 0 || $uri[0] === 'restapi' ) {
-    $id = isset($uri[1]) ? (int)$uri[1] : null;
+// Instancia los controladores
+$productoController = new ProductoController();
+$tallerController = new TalleresController();
 
-
-
-
-switch ($method) {
-    case 'GET':
-        if ($id) {
-            $ofertaController->show($id);
-        }else {
-             // Llama al método del controlador
-        $ofertaController->obtenerOfertas();
+switch ($resource) {
+    case 'productos':
+        // Lógica para productos
+        switch ($method) {
+            case 'GET':
+                if ($id) {
+                    $productoController->verProducto($id);
+                } else {
+                    $productoController->obtenerProductos();
+                }
+                break;
+            case 'POST':
+                $input = json_decode(file_get_contents('php://input'), true);
+                $productoController->crearProducto($input);
+                break;
+            case 'PUT':
+                $input = json_decode(file_get_contents('php://input'), true);
+                if ($id) {
+                    $productoController->actualizarProducto($id, $input);
+                } else {
+                    jsonResponse(['error' => 'ID requerido para actualizar'], 400);
+                }
+                break;
+            case 'DELETE':
+                if ($id) {
+                    $productoController->eliminarProducto($id);
+                } else {
+                    jsonResponse(['error' => 'ID requerido para eliminar'], 400);
+                }
+                break;
         }
-       
         break;
-    case 'POST':
-        // Solo necesitas pasar los datos de entrada
-        $ofertaController->crearOferta($input);
-        break;
-    case 'PUT':
-        $ofertaController->actualizarOferta($id);
-        break;
-    case 'DELETE':
-        if ($id) {
-        $ofertaController->eliminarOferta($id);
-        break;
-        }else {
-            jsonResponse(['error' => 'ID requerido para eliminar'], 400);
+
+    case 'talleres':
+        // Lógica para talleres
+        switch ($method) {
+            case 'GET':
+                if ($id) {
+                    $tallerController->verTaller($id);
+                } else {
+                    $tallerController->obtenerTalleres();
+                }
+                break;
+            case 'POST':
+                $input = json_decode(file_get_contents('php://input'), true);
+                $tallerController->crearTaller($input);
+                break;
+            case 'PUT':
+                $input = json_decode(file_get_contents('php://input'), true);
+                if ($id) {
+                    $tallerController->actualizarTaller($id, $input);
+                } else {
+                    jsonResponse(['error' => 'ID requerido para actualizar'], 400);
+                }
+                break;
+            case 'DELETE':
+                if ($id) {
+                    $tallerController->eliminarTaller($id);
+                } else {
+                    jsonResponse(['error' => 'ID requerido para eliminar'], 400);
+                }
+                break;
         }
-        
         break;
+
     default:
-        http_response_code(405); // Method Not Allowed
-        echo json_encode(['message' => 'Método de solicitud no válido']);
+        http_response_code(404);
+        echo json_encode(['error' => 'Ruta no encontrada']);
         break;
-
-    }
-    
-}else {
-    http_response_code(404);
-    echo json_encode(['error' => 'Ruta no encontrada']);
-    exit;
 }
-
-?> 
+?>

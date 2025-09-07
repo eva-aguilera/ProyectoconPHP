@@ -1,7 +1,7 @@
 <?php
 class Database {
     private $host = "localhost";
-    private $db_name = "users";   // nombre base de datos
+    private $db_name = "tejelanas_db";   // nombre base de datos
     private $username = "root";  // usuario de base de datos
     private $password = "";     // contraseña de base de datos
     private $conn;
